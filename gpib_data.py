@@ -9,9 +9,6 @@ import stuff
 import csv
 import time
 import wx
-import visa #use inst_bus instead of visa so the calling application
-#can provide the simulated (visa2) or real version of visa
-import visa2
 import numpy as np
 import gpib_inst
 import openpyxl
@@ -101,8 +98,22 @@ class GPIBThreadF(stuff.WorkerThread):
             return 0
         
     def MakeSafe(self):
-        pass
-        
+        """
+        Make the instruments safe, bypass the self.com
+        command in order to pass it directly to the instruments,
+        that way recording weather or not the making safe worked
+        for the instruments. Reports to GUI if it is unsafe.
+        """
+        sucessX,valX,stringX = self.sourceX.MakeSafe()
+        sucessS,valS,stringS = self.sourceS.MakeSafe()
+        sucessM,valM,stringM = self.meter.MakeSafe()
+        self.PrintSave("Make safe sent. status is:")
+        self.PrintSave("SourceX {}\nSourceS {}\nMeter {}".format(sucessX,sucessS,sucessM))
+        if sucessX == False or sucessS == False or sucessM == False:
+            wx.PostEvent(self._notify_window, stuff.ResultEvent(self.EVT, "UNSAFE"))
+        else:
+            wx.PostEvent(self._notify_window, stuff.ResultEvent(self.EVT, None))
+            
     def Error_string_maker(self):
         """
         Reads all errors in the instruments, and appends them together in a string.
