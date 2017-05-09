@@ -172,7 +172,8 @@ class GraphFrame( noname.MyFrame1 ):
         self.filled_grid = controlgrid.excel_to_grid(self.proj_file, 'Control', self.m_grid3)
         if self.filled_grid == True:
             grid = self.m_grid3
-            if int(float(grid.GetCellValue(3,3)))>int(grid.GetNumberRows()): #int(float( is needed as it cant seem to cast straight to an int
+            if int(float(grid.GetCellValue(3,3)))>int(grid.GetNumberRows()):
+                #int(float( is needed as it cant seem to cast straight to an int
                 print("Final row needed to be updated in grid")
                 grid.SetCellValue(3,3,str(grid.GetNumberRows()))
         else:
@@ -269,7 +270,8 @@ class GraphFrame( noname.MyFrame1 ):
         
     def OnAnalyse(self,event):
         """
-        Reads the name of the file to analyse, and sends it to the analysis object analysis.Analyser
+        Reads the name of the file to analyse,
+        and sends it to the analysis object analysis.Analyser
         """
         #read a text box to get the name of file to analyse
         #create analysis object, send it the name of the file
@@ -319,7 +321,8 @@ class GraphFrame( noname.MyFrame1 ):
 
     def DoReset(self, event):
         """
-        Resets by clearing the data, and clearing the on screen text feedback. Also sets the Make Safe button back to green.
+        Resets by clearing the data, and clearing the on screen text feedback.
+        Also sets the Make Safe button back to green.
         """
         #reset the data, and clear the text box
         self.doStop()
@@ -350,12 +353,13 @@ class GraphFrame( noname.MyFrame1 ):
             ds.update({str(dicts.GetCellValue(row,2)):str(dicts.GetCellValue(row,3))})
             dx.update({str(dicts.GetCellValue(row,4)):str(dicts.GetCellValue(row,5))})
 
-        dm.update({'NoError':eval("'"+dm['NoError']+"'")}) #so that the read_raw function matches the no error string
+        dm.update({'NoError':eval("'"+dm['NoError']+"'")})
+        #so that the read_raw function matches the no error string
         ds.update({'NoError':eval("'"+ds['NoError']+"'")})
         dx.update({'NoError':eval("'"+dx['NoError']+"'")})
-        self.meter = gpib_inst.INSTRUMENT('M', bus = self.MeterAdress.GetValue(),**dm)
-        self.sourceS = gpib_inst.INSTRUMENT('S', bus = self.SAdress.GetValue(),**ds)
-        self.sourceX = gpib_inst.INSTRUMENT('X', bus = self.XAdress.GetValue(),**dx)        
+        self.meter = gpib_inst.INSTRUMENT(self.inst_bus,'M', bus = self.MeterAdress.GetValue(),**dm)
+        self.sourceS = gpib_inst.INSTRUMENT(self.inst_bus,'S', bus = self.SAdress.GetValue(),**ds)
+        self.sourceX = gpib_inst.INSTRUMENT(self.inst_bus,'X', bus = self.XAdress.GetValue(),**dx)        
         return [self.meter,self.sourceS,self.sourceX]
 
     def OnOverideSafety(self,event):
@@ -387,11 +391,18 @@ class GraphFrame( noname.MyFrame1 ):
         self.START_TIME = time.localtime()
         
         #HIDE BUTTONS
-        for button in [self.m_menuItem21,self.m_menuItem11,self.m_menuItem111,self.m_menuItem2,self.m_menuItem1,self.m_menuItem25,self.m_menuItem26,self.m_button15,self.m_button16]: button.Enable(False)
+        for button in [self.m_menuItem21,self.m_menuItem11,self.m_menuItem111,\
+                       self.m_menuItem2,self.m_menuItem1,self.m_menuItem25,\
+                       self.m_menuItem26,self.m_button15,self.m_button16]:
+            button.Enable(False)
         
         #now call the thread
         if not self.worker1:
-            self.worker1 = gpib_data.GPIBThreadF(self, self.EVT_RESULT_ID_1, [self.inst_bus, grid, start_row, stop_row, dvm_nordgs_col, self.meter, dvm_range_col, self.sourceX, sX_range_col, sX_setting_col,self.sourceS, sS_range_col, sS_setting_col,delay_col, self.Analysis_file_name], self.data,self.START_TIME,self.OverideSafety)
+            self.worker1 = gpib_data.GPIBThreadF(self, self.EVT_RESULT_ID_1,\
+            [self.inst_bus, grid, start_row, stop_row, dvm_nordgs_col, self.meter,\
+             dvm_range_col, self.sourceX, sX_range_col, sX_setting_col,self.sourceS,\
+             sS_range_col, sS_setting_col,delay_col, self.Analysis_file_name],\
+            self.data,self.START_TIME,self.OverideSafety)
             
     def OnStop(self, event):
         self.doStop()
@@ -432,14 +443,12 @@ class GraphFrame( noname.MyFrame1 ):
     def OnResult0(self, event):
         """Show Result status, event for termination of graph thread"""
         if event.data is None:
-            # Thread aborted (using our convention of None return)
-##             print'Plotting aborted', time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
+
             self.m_textCtrl14.AppendText('Plotting aborted ')
             self.m_textCtrl14.AppendText(time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()))
             self.m_textCtrl14.AppendText('\n')
         else:
-            # Process results here
-##             print'Thread Result: %s' % event.data, time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
+
             self.m_textCtrl14.AppendText('Plot ended ')
             self.m_textCtrl14.AppendText(time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()))
             self.m_textCtrl14.AppendText('\n')
@@ -450,7 +459,10 @@ class GraphFrame( noname.MyFrame1 ):
         """Show Result status, event for termination of gpib thread"""
         
         #ENABLE BUTTONS
-        for button in [self.m_menuItem21,self.m_menuItem11,self.m_menuItem111,self.m_menuItem2,self.m_menuItem1,self.m_menuItem25,self.m_menuItem26,self.m_button15,self.m_button16]: button.Enable(True)
+        for button in [self.m_menuItem21,self.m_menuItem11,self.m_menuItem111,\
+                       self.m_menuItem2,self.m_menuItem1,self.m_menuItem25,\
+                       self.m_menuItem26,self.m_button15,self.m_button16]:
+            button.Enable(True)
 
         if event.data is None:
             # Thread aborted (using our convention of None return)
@@ -556,7 +568,8 @@ class GraphFrame( noname.MyFrame1 ):
             self.m_textCtrl23.AppendText('select instrument')
 
     def doOnSend(self,adress):
-        """ sends the commend to the adress specified, creates a new visa resource manager."""
+        """ sends the commend to the adress specified,
+        creates a new visa resource manager."""
         command = self.m_textCtrl18.GetValue()
         rm = self.inst_bus.ResourceManager()#new Visa
         instrument = rm.open_resource(adress)
@@ -565,7 +578,8 @@ class GraphFrame( noname.MyFrame1 ):
         
     def OnReadTestCommand(self, event):
         """
-        Reads from whatever instrument is selected using doRead. Will fail if it finds nothing on the instrument bus.
+        Reads from whatever instrument is selected using doRead.
+        Will fail if it finds nothing on the instrument bus.
         """
         instrument = self.m_comboBox8.GetValue()
         if instrument == 'Meter':
@@ -618,7 +632,8 @@ class GraphFrame( noname.MyFrame1 ):
         Make sure threads not running if frame is closed before stopping everything.
         Seems to generate errors, but at least the threads do get stopped!
         The delay after stopping the threads need to be longer than the time for
-        a thread to normally complete? Since thread needs to be able to post event back to the main frame.
+        a thread to normally complete? Since thread needs to be able to
+        post event back to the main frame.
         """
         if self.worker1: #stop main GPIB thread
             self.worker1.abort()
@@ -654,9 +669,6 @@ class HelpBox ( wx.Frame ):
 
     def __del__( self ):
         pass
-	
-	
-	
 
 
 if __name__ == "__main__":
