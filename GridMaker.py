@@ -4,18 +4,23 @@ import numpy as np
 
 """
 This code makes a printer to a specified grid, capable of printing columns and rows.
-It also generates the necessary columns for the ref-step algorithm based on the ranges of the instruments sent
+It also generates the necessary columns for the ref-step algorithm based on the ranges of the instruments sent.
+Only the funcitons to do with printing to a grid are specific to the GUI, they can be replaced with something
+to save into an excel sheet or even a csv.
 """
 
 class GridPrinter(object):
     """
-    Prints to a wx grid
+    Creates a ref-step table, based on the instruments' ranges and desired
+    calibration points specified in the tables.
     """
     def __init__(self, other_self,grid):
         self.other_self = other_self
         self.grid = grid
         
     def ColMaker(self,rm,rs,rx,cal_ranges):
+        """Makes entire columns from smaller sets of measurements, a measuremnt set
+        is a ascending and decending sequence"""
         #create empty arrays
         info = []
         for Range in cal_ranges:
@@ -29,6 +34,8 @@ class GridPrinter(object):
         return full_cols
         
     def SetMaker(self,rm,rs,rx,single_range):
+        """ Make ascending and descending sets of measuremnts, based on the ranges of insturments.
+        Retusn a sequence of columns, fo rthe various settings for instrumetns and the pause time etc."""
         rx_use = None
         rm_use = None
         #want to find the X range that encompases the max output, to 0.5%?
@@ -99,6 +106,7 @@ class GridPrinter(object):
         return cols
         
     def mirror(self,array): #mirrors array about last value
+        """Just a helper function to mirror and array given to it"""
         temp = array[0:-1]
         return array+temp[::-1]
         
@@ -126,7 +134,9 @@ class GridPrinter(object):
         
     def PrintCol(self, col, start_col,start_row):
         """
-        Prints a column from specified starting point
+        Prints a column from specified starting point, to a wx grid.
+        Has acess to the grid since it was sent during initialisation as
+        "grid".
         """
         #check if there are enough rows:
         min_rows = start_row+len(col)-1 #minimum rows required
@@ -144,7 +154,7 @@ class GridPrinter(object):
 
     def PrintRow(self, row, start_col,start_row):
         """
-        Prints a row from specified starting point
+        Prints a row from specified starting point, to a wx grid.
         """
         #check if there are enough rows:
         min_cols = start_col+len(row) #minimum rows required

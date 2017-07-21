@@ -24,28 +24,37 @@ class Analyser(object):
         self.S_setting_col = self.DoF_col-3
         self.X_setting_col = self.S_setting_col-2 #should always be 2 cols away
 
-        #warnings.simplefilter('ignore')
-        self.wb = load_workbook(book_name,data_only = True)
-        #warnings.simplefilter('default')
-        #try command? if fail, let user know.
-        self.sh = self.wb[sheet_name]
+        self.results = []
         
-        self.sh_results = self.wb.create_sheet(title="Results")
-        window = [1,self.sh.max_row+1,1,self.sh.max_column+1]
-        self.data = self.get_data(window) #row,row,col,col
+        self.wb = None
+        if book_name:
+            try:
+                #warnings.simplefilter('ignore')
+                self.wb = load_workbook(book_name,data_only = True)
+                #warnings.simplefilter('default')
+                #try command? if fail, let user know.
+                self.sh = self.wb[sheet_name]
+            
+                self.sh_results = self.wb.create_sheet(title="Results")
+                window = [1,self.sh.max_row+1,1,self.sh.max_column+1]
+                self.data = self.get_data(window) #row,row,col,col
+            except IOError:
+                print("Could not load workbook: "+str(book_name))
+        else:
+            print("No valid file name")
 
     def Save(self,name):
         """
         Saves the product excel sheet to a given name.
         """
-        self.wb.save(name)
+        if self.wb:
+            self.wb.save(name)
         
     def print_cell(self,value,row,column,sheet):
         """
         Prints a single cell to the sheet. function takes in the cell value, the cell row, and the cell column in this order
         """
         sheet.cell(row = row,column = column,value = value)
-        #print(value,row,column)
         
     def PrintCol(self,col,start_row,start_col,sheet):
         """
@@ -53,7 +62,12 @@ class Analyser(object):
         """
         for value, row in zip(col,range(start_row,len(col)+start_row)):
             self.print_cell(value,row,start_col,sheet)
-
+            
+    def print_cols(self,cols,start_row):
+        length = len(cols)
+        for col,i in zip(cols, range(1,length+1)):
+            self.PrintCol(col,start_row,i,self.sh_results)
+            
     def read_cell(self,cell_row,cell_col):
         """
         Reads a cell from the loaded data. cell coordinates must be within the window specified earlier.
@@ -179,10 +193,15 @@ class Analyser(object):
         These are first sent to the split_set function to be seperated out for the different instruments, then each segment is sent to a ratio computation function which
         returns the gain ratio and lineariy ratio for that set.
         """
+        if self.wb == None:
+            return
+        
         end_point = float(self.read_cell(3,3))
         continue_analysis = True #flag for continuing to read through the data table
         start_row = int(float(self.read_cell(3,1)))-1 #wx starts at zero, initial starting row
 
+        printing_row = 1 #The first row to start printing columns to.
+        
         while continue_analysis ==True:
             center,last_row = self.find_center(start_row)
             print(start_row,center,last_row)
@@ -190,6 +209,8 @@ class Analyser(object):
                 print("last set not found")
                 continue_analysis = False
             else:
+                cols = []
+                
                 S_settings = [float(self.read_cell(i,self.S_setting_col)) for i in range(start_row,last_row+1)]
                 X_settings = [float(self.read_cell(i,self.X_setting_col)) for i in range(start_row,last_row+1)]
 
@@ -199,27 +220,28 @@ class Analyser(object):
                 m_top,m_bottom,x_top,x_bottom,s0,s1 = self.split_set(GTC_list,S_settings)
                 
                 x_ratios = self.x_ratio(x_top,s0,s1)+self.x_ratio(x_bottom[::-1],s0,s1)
-                m_ratios = self.m_ratio(m_top,s0,s1)+self.m_ratio(m_bottom[::-1],s0,s1) #join arrays of the three ratios, linearity, gain, fit ??
+                m_ratios = self.m_ratio(m_top,s0,s1)+self.m_ratio(m_bottom[::-1],s0,s1)
+                #join arrays of the three ratios, linearity, gain, fit ??
 
                 ratios = x_ratios+m_ratios
-                
-                print("m ratios"+str([x.x for x in m_ratios]))
-                print("x ratios"+str([x.x for x in x_ratios]))
 
                 #print the ratios to the sheet
-                self.PrintCol([x.label for x in ratios],start_row+1,self.mean_col+5,self.sh_results)
-                self.PrintCol(["Ratio"]+[x.x for x in ratios],start_row,self.mean_col+6,self.sh_results)
-                self.PrintCol(["STDEV"]+[x.u for x in ratios],start_row,self.mean_col+7,self.sh_results)
-                self.PrintCol(["Effct. DoF"]+[x.df for x in ratios],start_row,self.mean_col+8,self.sh_results)
-                
+                cols.append(["Label"]+[x.label for x in ratios])
+                cols.append(["Ratio"]+[x.x for x in ratios])
+                cols.append(["STDEV"]+[x.u for x in ratios])
+                cols.append(["Effct. DoF"]+[x.df for x in ratios])
+                self.print_cols(cols,printing_row)
+                printing_row += len(ratios) + 1
+                self.results.append(cols)
                 #check if there is a next section:
                 if last_row>=float(self.read_cell(3,3))-1:
                     continue_analysis = False
 
                 else:
                     start_row = last_row+1
+        #Return the results? they are acessible as a class variable.           
+        #return self.results
 
-    
 
 if __name__ =="__main__":
     a = Analyser('raw.simulated.xlsx','Sheet')

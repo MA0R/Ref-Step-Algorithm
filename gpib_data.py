@@ -38,7 +38,7 @@ class GPIBThreadF(stuff.WorkerThread):
         self.OverideSafety = OverideSafety
         self.MadeSafe = False
 
-        time_bit = time.strftime("%Y.%m.%d.%H.%M.%S, ",time.localtime())
+        time_bit = time.strftime("%Y.%m.%d.%H.%M.%S",time.localtime())
         log_file_name = 'log.'+time_bit+".txt"
         self.raw_file_name = 'raw.'+time_bit
         self.wb = openpyxl.Workbook()
@@ -48,16 +48,11 @@ class GPIBThreadF(stuff.WorkerThread):
         first_line = first_line+['start time','end time','readings...']
 
         for i in range(6):
-            self.sh.append( [ self.read_grid_cell(i,column) for column in range(10) ])
+            self.sh.append( [self.read_grid_cell(i,column) for column in range(10)])
             #append empty things, but they can contain more useful info later
             #dates, instruments, start time finish time?
             #this skeeps the analysis sheets compatible with the normal input files.
         self.sh.append(first_line)
-        
-        self.com(self.voltmeter.create_instrument)
-        self.com(self.sourceX.create_instrument)
-        self.com(self.sourceS.create_instrument)
-
         #must be the last command:
         self.start()
 
@@ -84,15 +79,15 @@ class GPIBThreadF(stuff.WorkerThread):
         if not self._want_abort:
             if send_item != None:
                 sucess,val,string = command(send_item)
+                self.PrintSave(string)
                 if sucess == False:
                     self._want_abort = 1
-                self.PrintSave(string)
                 return val
             else:
                 sucess,val,string = command()
+                self.PrintSave(string)
                 if sucess == False:
                     self._want_abort = 1
-                self.PrintSave(string)
                 return val
         else:
             return 0
@@ -104,12 +99,12 @@ class GPIBThreadF(stuff.WorkerThread):
         that way recording weather or not the making safe worked
         for the instruments. Reports to GUI if it is unsafe.
         """
-        sucessX,valX,stringX = self.sourceX.MakeSafe()
-        sucessS,valS,stringS = self.sourceS.MakeSafe()
-        sucessM,valM,stringM = self.meter.MakeSafe()
+        sucessX,valX,stringX = self.sourceX.make_safe()
+        sucessS,valS,stringS = self.sourceS.make_safe()
+        sucessM,valM,stringM = self.meter.make_safe()
         self.PrintSave("Make safe sent. status is:")
         self.PrintSave("SourceX {}\nSourceS {}\nMeter {}".format(sucessX,sucessS,sucessM))
-        if sucessX == False or sucessS == False or sucessM == False:
+        if not all([sucessX,sucessS,sucessM]):
             wx.PostEvent(self._notify_window, stuff.ResultEvent(self.EVT, "UNSAFE"))
         else:
             wx.PostEvent(self._notify_window, stuff.ResultEvent(self.EVT, None))
@@ -249,17 +244,18 @@ class GPIBThreadF(stuff.WorkerThread):
 
             a = float(self.com(self.voltmeter.read_instrument))
             #meter class provides string for evaluation
-            
-            if abs((a-nominal_reading)) > abs(0.05*range_max):
-                #taking abs to allow for negative ranging.
-                #readings is more than 5% away from nominal, abort
-                error_strings = error_strings+' reading '+str(i)+' is more than 5% from nominal.'
-                self.PrintSave("Readings exceeded 5% from nominal, aborting. Check settle times, ranges, and connections")
-                self._want_abort = 1
-            elif abs((a-nominal_reading)) > abs(0.001*range_max):
-                #readings is more than 0.1% of range away from nominal, issue a warning
-                error_strings = error_strings+' reading '+str(i)+' is more than 0.1% from nominal.'
-                self.PrintSave("Readings exceeded 0.1% from nominal. Check settle times, ranges, and connections")
+
+            if self.OverideSafety == False: #Only do these checks if we dont overide safety?
+                if abs((a-nominal_reading)) > abs(0.05*range_max):
+                    #taking abs to allow for negative ranging.
+                    #readings is more than 5% away from nominal, abort
+                    error_strings = error_strings+' reading '+str(i)+' is more than 5% from nominal.'
+                    self.PrintSave("Readings exceeded 5% from nominal, aborting. Check settle times, ranges, and connections")
+                    self._want_abort = 1
+                elif abs((a-nominal_reading)) > abs(0.001*range_max):
+                    #readings is more than 0.1% of range away from nominal, issue a warning
+                    error_strings = error_strings+' reading '+str(i)+' is more than 0.1% from nominal.'
+                    self.PrintSave("Readings exceeded 0.1% from nominal. Check settle times, ranges, and connections")
             
             self.wait(self.voltmeter.measure_seperation) #wait if voltmeter needs to not be read continuously
             self.PrintSave(time.strftime("%Y.%m.%d.%H.%M.%S, ",time.localtime()) + repr(a) + '\n')
@@ -270,37 +266,40 @@ class GPIBThreadF(stuff.WorkerThread):
     def print_instrument_status(self,row):
         """Read the status of all instruments, print to grid"""
         self.com(self.voltmeter.inst_status)
-        self.set_grid_val(row, self.dvm_nordgs_col + 3,str(self.com(self.voltmeter.read_instrument)))
+        self.set_grid_val(row, self.dvm_nordgs_col+3, str(self.com(self.voltmeter.read_instrument)))
         #force string of value as it needs to go into the grid and grid only takes in strings.
         
         self.com(self.sourceS.inst_status)
-        self.set_grid_val(row, self.dvm_nordgs_col + 4,str(self.com(self.sourceS.read_instrument)))
+        self.set_grid_val(row, self.dvm_nordgs_col+4, str(self.com(self.sourceS.read_instrument)))
         
         self.com(self.sourceX.inst_status)
-        self.set_grid_val(row, self.dvm_nordgs_col + 5,str(self.com(self.sourceX.read_instrument)))
+        self.set_grid_val(row, self.dvm_nordgs_col+5, str(self.com(self.sourceX.read_instrument)))
 
     def run(self):
         """
         Main thread, reads through the table and executes commands.
         """
-        state = 'clear'
-        #check integer/float values are correct type ()
-        if self.OverideSafety == False:
-            self.SafetyCheck()
-        
+        self.com(self.voltmeter.create_instrument)
+        self.com(self.sourceX.create_instrument)
+        self.com(self.sourceS.create_instrument)
+        #If the initialisations failed, stop the thread immediatly.
+        #There is no point running make safe if the instruments arent there.
         if self._want_abort:
-            self.PrintSave('safety checks failed, making safe, aborting')
-            if self.MadeSafe == False:
-                self.MakeSafe()
-            self.end()
+            #Notify the window that the thread ended, so buttons are enabled.
+            wx.PostEvent(self._notify_window, stuff.ResultEvent(self.EVT, 'GPIB ended'))
             return
         
+        if self.OverideSafety == False: #Then do the safety checks.
+            state = self.SafetyCheck()
+            if state != 'clear': self._want_abort = True
+            self.PrintSave('safety checks failed, making safe, aborting')
+            
         #initialise instruments
         self.initialise_instruments()
         
         for row in range(self.start_row,self.stop_row + 1):
             if self._want_abort:
-                break
+                break #Breaks and skips to the end, where it runs "self.end()".
             
             #do the row highlighting, force a refresh.
             self.PrintSave("Spread sheet row "+str(int(row)+1))
@@ -488,5 +487,5 @@ class GPIBThreadF(stuff.WorkerThread):
                 return state
             state = self.CheckInstruments(self.sourceX,self.sourceS)
             
-        if state != 'clear': self._want_abort = 1
+        return state
         

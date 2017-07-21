@@ -1,8 +1,8 @@
 """
-Main thread for controlling the buttons of the ref-step algorithm
+Main thread for controlling the buttons of the ref-step algorithm.
+Information is collected here and sent to other objects for handling.
 """
 import wx, wx.html
-import noname
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg
 from matplotlib.figure import Figure
@@ -10,27 +10,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 import GTC
 import csv
-import gpib_data
-import gpib_inst
-import stuff
-import sys
-import graph_data
-import time
-import visa2 # this is the simulation version of visa
-import visa
-import GridMaker
 import os
+import sys
+import visa
+import time
+
+import noname
+import visa2 # this is the simulation version of visa
+import GridMaker
+import graph_data
 import pywxgrideditmixin
 import tables
 import analysis
-
+import gpib_data
+import gpib_inst
+import stuff
 class GraphFrame( noname.MyFrame1 ):
     def __init__( self, parent ):
         noname.MyFrame1.__init__( self, parent)
         #the mixin below offers better ctrl c ctr v cut and paste than the basic wxgrid
         wx.grid.Grid.__bases__ += (pywxgrideditmixin.PyWXGridEditMixin,)
         self.m_grid3.__init_mixin__()
+        self.m_grid21.__init_mixin__()
+        self.m_grid2.__init_mixin__()
+        self.m_grid4.__init_mixin__()
         self.number_plots = 1
+        
         self.CreateGraph('time', self.number_plots)
         self.m_button2.SetLabel('Plot') #starts with plotting off
         self.paused = True
@@ -62,11 +67,16 @@ class GraphFrame( noname.MyFrame1 ):
         self.loaded_dict = False
         self.loaded_ranges = False
         self.OverideSafety = False
+
+        self.m_scrolledWindow1.Enable(False)
         
-        col_names = ['Min','Max','# Readings','Pre-reading delay','Inter-reading delay','# Repetitions','# steps','X ratio','STD','Effective DoF','M ratio','STD','Effective DoF']
+        col_names = ['Min','Max','# Readings','Pre-reading delay','Inter-reading delay','# Repetitions','# steps']
         for i in range(len(col_names)):
             self.m_grid21.SetColLabelValue(i, col_names[i])
-
+            
+        #Murray wanted a popup window with info?
+        self.OnAbout(None)
+        
     def CreateGraph(self, xlabel, number):
         """
         #number is the number of subplots to be created
@@ -156,18 +166,16 @@ class GraphFrame( noname.MyFrame1 ):
         
         
     def OnLoadTable(self, event):
+        """Immediatly  calls the FillGrid function, so it can be used without the event too."""
         self.FillGrid()
         
     def FillGrid(self):
         """
         Loads self.proj_file to the grid. Requires a dictionary sheet named "Dict" and
         a control sheet named "Sheet 1". Uses tables.TABLES for a excel-to-grid object.
-        Need to change from try-except to a structure that returns a failure if the grid was
-        not sucessfully loaded. This would then better pin point errors, since try-except
-        simply does the exception if it came to an error. 
         """
         
-        controlgrid = tables.TABLES(self)#note passing self is not ideal, pass the scroll window instead
+        controlgrid = tables.TABLES(self)
 
         self.filled_grid = controlgrid.excel_to_grid(self.proj_file, 'Control', self.m_grid3)
         if self.filled_grid == True:
@@ -176,6 +184,7 @@ class GraphFrame( noname.MyFrame1 ):
                 #int(float( is needed as it cant seem to cast straight to an int
                 print("Final row needed to be updated in grid")
                 grid.SetCellValue(3,3,str(grid.GetNumberRows()))
+            self.m_grid3.Layout()
         else:
             print("no sheet named 'Control' found")
             
@@ -184,6 +193,7 @@ class GraphFrame( noname.MyFrame1 ):
             col_names = ['Key words','Meter','Key words','Source S','Key words','Source X']
             for i in range(len(col_names)):
                 self.m_grid2.SetColLabelValue(i, col_names[i])
+            self.m_grid2.Layout()
         else:
             print("no sheet named 'Dict' found, can not run")
             
@@ -192,11 +202,14 @@ class GraphFrame( noname.MyFrame1 ):
             col_names = ['Min','Max','# Readings','Pre-reading delay','Inter-reading delay','# Repetitions','# steps']
             for i in range(len(col_names)):
                 self.m_grid21.SetColLabelValue(i, col_names[i])
+            self.m_grid21.Layout()
         else:
             print("no sheet named 'Ranges' found")
 
     def OnAddRow(self,event):
+        """Add another row to the ranges table, this is necessary as it requires manual inputting."""
         self.m_grid21.AppendRows(1, True)
+        self.m_grid21.Layout()
         
     def OnGenerateTable(self,event):
         """
@@ -212,37 +225,45 @@ class GraphFrame( noname.MyFrame1 ):
         """
         Generate table according to the calibration ranges table
         """
-        
-        grid = self.m_grid3
+        grid = self.m_grid3 #The grid to be used.
+        #Make the grid 0 by 0, so it enlarges to exactly the right size when data is inputted. 
         if grid.GetNumberRows()>0:
             grid.DeleteRows(0,grid.GetNumberRows() ,True)
         if grid.GetNumberCols()>0:
             grid.DeleteCols(0,grid.GetNumberCols() ,True)
-            
-        range_table = self.m_grid21
+        
+        range_table = self.m_grid21 #Table containing the ranges for the calibration.
         cal_ranges = []
         for row in range(range_table.GetNumberRows()):
-            if str(range_table.GetCellValue(row,1)): #if the first cell is non empty
-                info = [str(range_table.GetCellValue(row,i)) for i in range(7)]
+            info = [str(range_table.GetCellValue(row,i)) for i in range(7)]
+            if all(info): #Checks if ALL elements of info are non-empty/non-zero.
                 cal_ranges.append(info)
+                
                 
         ranges = []
         for inst in instruments:
-            ranges.append(inst.range)
-        rm,rs,rx = ranges
+            ranges.append(inst.range) #Collects the physical ranges of the instrument.
+            #Recall that those could be different to the calibration ranges, eg:
+            #Instrument can have a range (0,12) but we want to do a buildup on (0,10).
+        rm,rs,rx = ranges #split up into range meter, range source, range sourceX.
         GridFactory = GridMaker.GridPrinter(self,grid)
         
-        full_cols = GridFactory.ColMaker(rm,rs,rx,cal_ranges)
+        full_cols = GridFactory.ColMaker(rm,rs,rx,cal_ranges) #Thats it, grid is made. All the previous stuff was colelcting info.
         for col,i in zip(full_cols, range(1,10)):
             GridFactory.PrintCol(col,i,8)
-        titles = ["X Range", "X Settings (V)","S Range","S Settings (V)","DVM Range","Nominal reading","#Readings","Delay (S)","DVM pause","DVM status","S status","X status","Mean","STD"]
+            #This prints the column to the table, since GridFactory has acess to the table in the GUI.
+            #This is because this instance of the class was sent to the grid maker.
+        #Just a long list of headers:
+        titles = ["X Range", "X Settings (V)","S Range","S Settings (V)","DVM Range","Nominal reading",\
+                  "#Readings","Delay (S)","DVM pause","DVM status","S status","X status","Mean","STD"]
         GridFactory.PrintRow(titles,1,7)
         info = ["Start Row",8,"Stop Row",grid.GetNumberRows()]
         GridFactory.PrintRow(info,0,4)
         info = ["instruments:","Meter: "+str(self.meter.label),"S: "+str(self.sourceS.label),"X: "+str(self.sourceX.label)]
         GridFactory.PrintRow(info,0,3)
 
-        self.filled_grid = True
+        self.filled_grid = True #Flag that the grid was sucessfully filled up.
+        self.m_grid3.Layout()
         
     def OnAnalysisFile(self, event):
         """
@@ -285,8 +306,11 @@ class GraphFrame( noname.MyFrame1 ):
         analyser = analysis.Analyser(xcel_name,xcel_sheet)
         analyser.analysis()
         analyser.Save(xcel_name)
-
-        #should print results to the table, or new range table.
+        controlgrid = tables.TABLES(self)
+        printed_results = controlgrid.excel_to_grid(xcel_name, 'Results', self.m_grid4)
+        
+        
+        #Perhaps find a god place to put back to the table.
         
     def OnSaveTables(self,event):
         """
@@ -349,18 +373,18 @@ class GraphFrame( noname.MyFrame1 ):
         ds={}
         rows = dicts.GetNumberRows()
         for row in range(rows):
-            dm.update({str(dicts.GetCellValue(row,0)):str(dicts.GetCellValue(row,1))})
-            ds.update({str(dicts.GetCellValue(row,2)):str(dicts.GetCellValue(row,3))})
-            dx.update({str(dicts.GetCellValue(row,4)):str(dicts.GetCellValue(row,5))})
+            dm.update({str(dicts.GetCellValue(row, 0)):str(dicts.GetCellValue(row, 1))})
+            ds.update({str(dicts.GetCellValue(row, 2)):str(dicts.GetCellValue(row, 3))})
+            dx.update({str(dicts.GetCellValue(row, 4)):str(dicts.GetCellValue(row, 5))})
 
-        dm.update({'NoError':eval("'"+dm['NoError']+"'")})
         #so that the read_raw function matches the no error string
-        ds.update({'NoError':eval("'"+ds['NoError']+"'")})
-        dx.update({'NoError':eval("'"+dx['NoError']+"'")})
-        self.meter = gpib_inst.INSTRUMENT(self.inst_bus,'M', bus = self.MeterAdress.GetValue(),**dm)
-        self.sourceS = gpib_inst.INSTRUMENT(self.inst_bus,'S', bus = self.SAdress.GetValue(),**ds)
-        self.sourceX = gpib_inst.INSTRUMENT(self.inst_bus,'X', bus = self.XAdress.GetValue(),**dx)        
-        return [self.meter,self.sourceS,self.sourceX]
+        #dm.update({'NoError':repr(dm['NoError'])})
+        #ds.update({'NoError':repr(ds['NoError'])})
+        #dx.update({'NoError':repr(dx['NoError'])})
+        self.meter = gpib_inst.INSTRUMENT(self.inst_bus, 'M', adress=self.MeterAdress.GetValue(), **dm)
+        self.sourceS = gpib_inst.INSTRUMENT(self.inst_bus, 'S', adress=self.SAdress.GetValue(), **ds)
+        self.sourceX = gpib_inst.INSTRUMENT(self.inst_bus, 'X', adress=self.XAdress.GetValue(), **dx)        
+        return [self.meter, self.sourceS, self.sourceX]
 
     def OnOverideSafety(self,event):
         self.OverideSafety = True
@@ -372,6 +396,8 @@ class GraphFrame( noname.MyFrame1 ):
         """
         Starts the algorithm, sends the created instruments to the wroker thread.
         """
+        self.m_scrolledWindow1.Enable(True)
+        
         self.meter,self.sourceS,self.sourceX = instruments
         #first read essential setup info from the control grid (self.m_grid3).        
         grid = self.m_grid3
@@ -390,7 +416,7 @@ class GraphFrame( noname.MyFrame1 ):
 
         self.START_TIME = time.localtime()
         
-        #HIDE BUTTONS
+        #DISABLE BUTTONS
         for button in [self.m_menuItem21,self.m_menuItem11,self.m_menuItem111,\
                        self.m_menuItem2,self.m_menuItem1,self.m_menuItem25,\
                        self.m_menuItem26,self.m_button15,self.m_button16]:
@@ -403,6 +429,7 @@ class GraphFrame( noname.MyFrame1 ):
              dvm_range_col, self.sourceX, sX_range_col, sX_setting_col,self.sourceS,\
              sS_range_col, sS_setting_col,delay_col, self.Analysis_file_name],\
             self.data,self.START_TIME,self.OverideSafety)
+            #It has a huge list of useful things that it needs.
             
     def OnStop(self, event):
         self.doStop()
@@ -469,9 +496,9 @@ class GraphFrame( noname.MyFrame1 ):
             print('GPIB data aborted'), time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
         else:
             # Process results here
-            print 'GPIB Result: %s' % event.data,time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
+            print 'GPIB Result: %s'%event.data, time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
             if event.data == "UNSAFE":
-                self.m_button12.SetBackgroundColour( wx.Colour( 255, 0, 0 ) )
+                self.m_button12.SetBackgroundColour(wx.Colour( 255, 0, 0 ))
         
     
         # In either event, the worker is done
@@ -565,16 +592,20 @@ class GraphFrame( noname.MyFrame1 ):
             adress = self.XAdress.GetValue()
             self.doOnSend(adress)
         else:
-            self.m_textCtrl23.AppendText('select instrument')
+            self.m_textCtrl23.AppendText('select instrument\n')
 
     def doOnSend(self,adress):
         """ sends the commend to the adress specified,
         creates a new visa resource manager."""
-        command = self.m_textCtrl18.GetValue()
-        rm = self.inst_bus.ResourceManager()#new Visa
-        instrument = rm.open_resource(adress)
-        instrument.write(command)
-        self.m_textCtrl23.AppendText(command+'\n')
+        try:
+            command = self.m_textCtrl18.GetValue()
+            rm = self.inst_bus.ResourceManager()#new Visa
+            instrument = rm.open_resource(adress)
+            instrument.write(command)
+            self.m_textCtrl23.AppendText(command+'\n')
+        except self.inst_bus.VisaIOError:
+            self.m_textCtrl23.AppendText('Failed to send\n')
+            
         
     def OnReadTestCommand(self, event):
         """
@@ -603,27 +634,26 @@ class GraphFrame( noname.MyFrame1 ):
             self.m_textCtrl23.AppendText(repr(value)+'\n')
             return
         except self.inst_bus.VisaIOError:
-            self.m_textCtrl23.WriteText('Failed to get reading from instrument\n')
+            self.m_textCtrl23.WriteText('Failed to read\n')
             return
 
     def OnHelp(self,event):
-        print("showing help")
         dlg = HelpBox(None)
         html = dlg.m_htmlWin1
-        name = 'help.html'
+        name = 'Manual.html'
         html.LoadPage(name)
         dlg.Show()
         
     def OnAbout(self,event):
         info = wx.AboutDialogInfo()
         info = wx.AboutDialogInfo()
-        info.SetName('Ref stepr')
+        info.SetName('Ref step')
         info.SetVersion('1.0.0')
         info.SetDescription("description")
         info.SetCopyright('(C) 2017-2018 Measurement Standards Laboratory of New Zealand')
-        info.SetWebSite('http://www.msl.irl.cri.nz')
-        info.SetLicence("who knows")
-        info.AddDeveloper('some code maker')
+        info.SetWebSite('http://www.measurement.govt.nz/')
+        info.SetLicence("Use it well")
+        info.AddDeveloper('some code monkey')
         wx.AboutBox(info)
 
     
@@ -643,11 +673,6 @@ class GraphFrame( noname.MyFrame1 ):
             self.worker0.abort()
             time.sleep(1.1)#minimises error messages from suddenly stopped graph
         self.Destroy()
-
-        
-###########################################################################
-## Class HelpFrame
-###########################################################################
 
 class HelpBox ( wx.Frame ):
     def __init__( self, parent ):

@@ -19,57 +19,16 @@ import wx.grid
 class MyFrame1 ( wx.Frame ):
 	
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Instrument Controller", pos = wx.DefaultPosition, size = wx.Size( 1500,700 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Instrument Controller", pos = wx.DefaultPosition, size = wx.Size( 1325,774 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 		
 		self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 		self.m_mgr = wx.aui.AuiManager()
 		self.m_mgr.SetManagedWindow( self )
 		self.m_mgr.SetFlags(wx.aui.AUI_MGR_DEFAULT)
 		
-		self.m_auinotebook4 = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.Point( -1,-1 ), wx.Size( 500,-1 ), 0 )
+		self.m_auinotebook4 = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.Point( -1,-1 ), wx.Size( -1,-1 ), 0 )
 		self.m_mgr.AddPane( self.m_auinotebook4, wx.aui.AuiPaneInfo() .Left() .CloseButton( False ).MaximizeButton( True ).MinimizeButton( True ).PinButton( True ).Dock().Resizable().FloatingSize( wx.Size( -1,-1 ) ) )
 		
-		self.m_panel5 = wx.Panel( self.m_auinotebook4, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TAB_TRAVERSAL )
-		gbSizer3 = wx.GridBagSizer( 0, 0 )
-		gbSizer3.SetFlexibleDirection( wx.BOTH )
-		gbSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-		
-		self.m_button13 = wx.Button( self.m_panel5, wx.ID_ANY, u"Generate a table", wx.DefaultPosition, wx.DefaultSize, 0 )
-		gbSizer3.Add( self.m_button13, wx.GBPosition( 1, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		self.Analysis_file_name = wx.TextCtrl( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		gbSizer3.Add( self.Analysis_file_name, wx.GBPosition( 2, 1 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		self.m_staticText10 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Analysis file name", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText10.Wrap( -1 )
-		gbSizer3.Add( self.m_staticText10, wx.GBPosition( 2, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		self.m_button122 = wx.Button( self.m_panel5, wx.ID_ANY, u"Analyse data", wx.DefaultPosition, wx.DefaultSize, 0 )
-		gbSizer3.Add( self.m_button122, wx.GBPosition( 2, 2 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		self.m_button5 = wx.Button( self.m_panel5, wx.ID_ANY, u"Start", wx.DefaultPosition, wx.DefaultSize, 0 )
-		gbSizer3.Add( self.m_button5, wx.GBPosition( 0, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		self.m_button6 = wx.Button( self.m_panel5, wx.ID_ANY, u"Stop", wx.DefaultPosition, wx.DefaultSize, 0 )
-		gbSizer3.Add( self.m_button6, wx.GBPosition( 0, 1 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		self.m_textCtrl81 = wx.TextCtrl( self.m_panel5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 500,250 ), wx.TE_MULTILINE )
-		gbSizer3.Add( self.m_textCtrl81, wx.GBPosition( 4, 0 ), wx.GBSpan( 1, 3 ), wx.ALL, 5 )
-		
-		self.m_button12 = wx.Button( self.m_panel5, wx.ID_ANY, u"Make Safe", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_button12.SetBackgroundColour( wx.Colour( 0, 255, 0 ) )
-		
-		gbSizer3.Add( self.m_button12, wx.GBPosition( 0, 2 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		self.m_staticText51 = wx.StaticText( self.m_panel5, wx.ID_ANY, u"Event reports", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText51.Wrap( -1 )
-		gbSizer3.Add( self.m_staticText51, wx.GBPosition( 3, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
-		
-		
-		self.m_panel5.SetSizer( gbSizer3 )
-		self.m_panel5.Layout()
-		gbSizer3.Fit( self.m_panel5 )
-		self.m_auinotebook4.AddPage( self.m_panel5, u"Control", False, wx.NullBitmap )
 		self.m_panel511 = wx.Panel( self.m_auinotebook4, wx.ID_ANY, wx.Point( -1,-1 ), wx.Size( -1,-1 ), wx.TAB_TRAVERSAL )
 		gbSizer311 = wx.GridBagSizer( 0, 0 )
 		gbSizer311.SetFlexibleDirection( wx.BOTH )
@@ -113,7 +72,7 @@ class MyFrame1 ( wx.Frame ):
 		self.m_textCtrl18 = wx.TextCtrl( self.m_panel511, wx.ID_ANY, u"Command", wx.DefaultPosition, wx.DefaultSize, 0 )
 		gbSizer311.Add( self.m_textCtrl18, wx.GBPosition( 5, 1 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
 		
-		self.m_textCtrl23 = wx.TextCtrl( self.m_panel511, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 250,100 ), 0 )
+		self.m_textCtrl23 = wx.TextCtrl( self.m_panel511, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 250,100 ), wx.TE_MULTILINE )
 		gbSizer311.Add( self.m_textCtrl23, wx.GBPosition( 6, 0 ), wx.GBSpan( 6, 2 ), wx.ALL, 5 )
 		
 		self.m_button15 = wx.Button( self.m_panel511, wx.ID_ANY, u"Send", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -127,8 +86,103 @@ class MyFrame1 ( wx.Frame ):
 		self.m_panel511.Layout()
 		gbSizer311.Fit( self.m_panel511 )
 		self.m_auinotebook4.AddPage( self.m_panel511, u"Instruments", True, wx.NullBitmap )
+		self.m_panel5 = wx.Panel( self.m_auinotebook4, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TAB_TRAVERSAL )
+		gbSizer3 = wx.GridBagSizer( 0, 0 )
+		gbSizer3.SetFlexibleDirection( wx.BOTH )
+		gbSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 		
-		self.m_auinotebook5 = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.Point( -1,-1 ), wx.Size( 500,-1 ), 0 )
+		self.m_button13 = wx.Button( self.m_panel5, wx.ID_ANY, u"Generate a table", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gbSizer3.Add( self.m_button13, wx.GBPosition( 1, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		self.m_button11 = wx.Button( self.m_panel5, wx.ID_ANY, u"Open dictionary", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gbSizer3.Add( self.m_button11, wx.GBPosition( 0, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		
+		self.m_panel5.SetSizer( gbSizer3 )
+		self.m_panel5.Layout()
+		gbSizer3.Fit( self.m_panel5 )
+		self.m_auinotebook4.AddPage( self.m_panel5, u"Control", False, wx.NullBitmap )
+		self.m_panel4 = wx.Panel( self.m_auinotebook4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		gbSizer6 = wx.GridBagSizer( 0, 0 )
+		gbSizer6.SetFlexibleDirection( wx.BOTH )
+		gbSizer6.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.m_button5 = wx.Button( self.m_panel4, wx.ID_ANY, u"Start", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gbSizer6.Add( self.m_button5, wx.GBPosition( 0, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		self.m_button12 = wx.Button( self.m_panel4, wx.ID_ANY, u"Make Safe", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_button12.SetBackgroundColour( wx.Colour( 0, 255, 0 ) )
+		
+		gbSizer6.Add( self.m_button12, wx.GBPosition( 0, 2 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		self.m_staticText51 = wx.StaticText( self.m_panel4, wx.ID_ANY, u"Event reports", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText51.Wrap( -1 )
+		gbSizer6.Add( self.m_staticText51, wx.GBPosition( 2, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		self.m_textCtrl81 = wx.TextCtrl( self.m_panel4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 500,250 ), wx.TE_MULTILINE )
+		gbSizer6.Add( self.m_textCtrl81, wx.GBPosition( 3, 0 ), wx.GBSpan( 1, 3 ), wx.ALL, 5 )
+		
+		self.m_button6 = wx.Button( self.m_panel4, wx.ID_ANY, u"Stop", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gbSizer6.Add( self.m_button6, wx.GBPosition( 0, 1 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		
+		self.m_panel4.SetSizer( gbSizer6 )
+		self.m_panel4.Layout()
+		gbSizer6.Fit( self.m_panel4 )
+		self.m_auinotebook4.AddPage( self.m_panel4, u"Run", False, wx.NullBitmap )
+		self.m_scrolledWindow5 = wx.ScrolledWindow( self.m_auinotebook4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
+		self.m_scrolledWindow5.SetScrollRate( 5, 5 )
+		gbSizer7 = wx.GridBagSizer( 0, 0 )
+		gbSizer7.SetFlexibleDirection( wx.BOTH )
+		gbSizer7.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.m_staticText10 = wx.StaticText( self.m_scrolledWindow5, wx.ID_ANY, u"Analysis file name", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText10.Wrap( -1 )
+		gbSizer7.Add( self.m_staticText10, wx.GBPosition( 0, 0 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		self.Analysis_file_name = wx.TextCtrl( self.m_scrolledWindow5, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		gbSizer7.Add( self.Analysis_file_name, wx.GBPosition( 0, 1 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		self.m_button122 = wx.Button( self.m_scrolledWindow5, wx.ID_ANY, u"Analyse data", wx.DefaultPosition, wx.DefaultSize, 0 )
+		gbSizer7.Add( self.m_button122, wx.GBPosition( 0, 2 ), wx.GBSpan( 1, 1 ), wx.ALL, 5 )
+		
+		self.m_grid4 = wx.grid.Grid( self.m_scrolledWindow5, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+		
+		# Grid
+		self.m_grid4.CreateGrid( 5, 4 )
+		self.m_grid4.EnableEditing( True )
+		self.m_grid4.EnableGridLines( True )
+		self.m_grid4.EnableDragGridSize( False )
+		self.m_grid4.SetMargins( 0, 0 )
+		
+		# Columns
+		self.m_grid4.EnableDragColMove( False )
+		self.m_grid4.EnableDragColSize( True )
+		self.m_grid4.SetColLabelSize( 30 )
+		self.m_grid4.SetColLabelValue( 0, u"Name" )
+		self.m_grid4.SetColLabelValue( 1, u"Ratio" )
+		self.m_grid4.SetColLabelValue( 2, u"Uncert" )
+		self.m_grid4.SetColLabelValue( 3, u"Dof" )
+		self.m_grid4.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+		
+		# Rows
+		self.m_grid4.EnableDragRowSize( True )
+		self.m_grid4.SetRowLabelSize( 80 )
+		self.m_grid4.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+		
+		# Label Appearance
+		
+		# Cell Defaults
+		self.m_grid4.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
+		gbSizer7.Add( self.m_grid4, wx.GBPosition( 1, 0 ), wx.GBSpan( 1, 4 ), wx.ALL, 5 )
+		
+		
+		self.m_scrolledWindow5.SetSizer( gbSizer7 )
+		self.m_scrolledWindow5.Layout()
+		gbSizer7.Fit( self.m_scrolledWindow5 )
+		self.m_auinotebook4.AddPage( self.m_scrolledWindow5, u"Analysis", False, wx.NullBitmap )
+		
+		self.m_auinotebook5 = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.Point( -1,-1 ), wx.Size( -1,-1 ), 0 )
 		self.m_mgr.AddPane( self.m_auinotebook5, wx.aui.AuiPaneInfo() .Center() .CloseButton( False ).MaximizeButton( True ).MinimizeButton( True ).PinButton( True ).Dock().Resizable().FloatingSize( wx.Size( -1,-1 ) ) )
 		
 		self.m_scrolledWindow1 = wx.ScrolledWindow( self.m_auinotebook5, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
@@ -138,8 +192,6 @@ class MyFrame1 ( wx.Frame ):
 		gbSizer1.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 		
 		self.m_panel61 = wx.Panel( self.m_scrolledWindow1, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TAB_TRAVERSAL )
-		self.m_panel61.SetMinSize( wx.Size( 500,300 ) )
-		
 		gbSizer1.Add( self.m_panel61, wx.GBPosition( 0, 0 ), wx.GBSpan( 1, 6 ), wx.EXPAND |wx.ALL, 5 )
 		
 		self.m_button2 = wx.Button( self.m_scrolledWindow1, wx.ID_ANY, u"Pause", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -270,6 +322,86 @@ class MyFrame1 ( wx.Frame ):
 		
 		self.m_mgr.AddPane( self.m_auinotebook41, wx.aui.AuiPaneInfo() .Left() .CloseButton( False ).MaximizeButton( True ).MinimizeButton( True ).PinButton( True ).Dock().Resizable().FloatingSize( wx.DefaultSize ).MinSize( wx.Size( 200,300 ) ) )
 		
+		self.m_scrolledWindow4 = wx.ScrolledWindow( self.m_auinotebook41, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
+		self.m_scrolledWindow4.SetScrollRate( 5, 5 )
+		bSizer2 = wx.BoxSizer( wx.VERTICAL )
+		
+		self.m_grid2 = wx.grid.Grid( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+		
+		# Grid
+		self.m_grid2.CreateGrid( 13, 6 )
+		self.m_grid2.EnableEditing( True )
+		self.m_grid2.EnableGridLines( True )
+		self.m_grid2.EnableDragGridSize( False )
+		self.m_grid2.SetMargins( 0, 0 )
+		
+		# Columns
+		self.m_grid2.EnableDragColMove( False )
+		self.m_grid2.EnableDragColSize( True )
+		self.m_grid2.SetColLabelSize( 30 )
+		self.m_grid2.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+		
+		# Rows
+		self.m_grid2.EnableDragRowSize( True )
+		self.m_grid2.SetRowLabelSize( 80 )
+		self.m_grid2.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+		
+		# Label Appearance
+		
+		# Cell Defaults
+		self.m_grid2.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
+		bSizer2.Add( self.m_grid2, 0, wx.ALL, 5 )
+		
+		
+		self.m_scrolledWindow4.SetSizer( bSizer2 )
+		self.m_scrolledWindow4.Layout()
+		bSizer2.Fit( self.m_scrolledWindow4 )
+		self.m_auinotebook41.AddPage( self.m_scrolledWindow4, u"Instrument commands", True, wx.NullBitmap )
+		self.m_scrolledWindow41 = wx.ScrolledWindow( self.m_auinotebook41, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
+		self.m_scrolledWindow41.SetScrollRate( 5, 5 )
+		bSizer21 = wx.BoxSizer( wx.VERTICAL )
+		
+		self.m_grid21 = wx.grid.Grid( self.m_scrolledWindow41, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+		
+		# Grid
+		self.m_grid21.CreateGrid( 8, 7 )
+		self.m_grid21.EnableEditing( True )
+		self.m_grid21.EnableGridLines( True )
+		self.m_grid21.EnableDragGridSize( False )
+		self.m_grid21.SetMargins( 0, 0 )
+		
+		# Columns
+		self.m_grid21.SetColSize( 0, 80 )
+		self.m_grid21.SetColSize( 1, 80 )
+		self.m_grid21.SetColSize( 2, 80 )
+		self.m_grid21.SetColSize( 3, 132 )
+		self.m_grid21.SetColSize( 4, 142 )
+		self.m_grid21.SetColSize( 5, 80 )
+		self.m_grid21.SetColSize( 6, 80 )
+		self.m_grid21.EnableDragColMove( False )
+		self.m_grid21.EnableDragColSize( True )
+		self.m_grid21.SetColLabelSize( 30 )
+		self.m_grid21.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+		
+		# Rows
+		self.m_grid21.EnableDragRowSize( True )
+		self.m_grid21.SetRowLabelSize( 80 )
+		self.m_grid21.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+		
+		# Label Appearance
+		
+		# Cell Defaults
+		self.m_grid21.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
+		bSizer21.Add( self.m_grid21, 0, wx.ALL, 5 )
+		
+		self.m_button151 = wx.Button( self.m_scrolledWindow41, wx.ID_ANY, u"Add Row", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer21.Add( self.m_button151, 0, wx.ALL, 5 )
+		
+		
+		self.m_scrolledWindow41.SetSizer( bSizer21 )
+		self.m_scrolledWindow41.Layout()
+		bSizer21.Fit( self.m_scrolledWindow41 )
+		self.m_auinotebook41.AddPage( self.m_scrolledWindow41, u"Calibration ranges", False, wx.NullBitmap )
 		self.m_scrolledWindow3 = wx.ScrolledWindow( self.m_auinotebook41, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
 		self.m_scrolledWindow3.SetScrollRate( 5, 5 )
 		self.m_scrolledWindow3.SetMinSize( wx.Size( 200,300 ) )
@@ -307,79 +439,6 @@ class MyFrame1 ( wx.Frame ):
 		self.m_scrolledWindow3.Layout()
 		bSizer1.Fit( self.m_scrolledWindow3 )
 		self.m_auinotebook41.AddPage( self.m_scrolledWindow3, u"Control settings", False, wx.NullBitmap )
-		self.m_scrolledWindow4 = wx.ScrolledWindow( self.m_auinotebook41, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
-		self.m_scrolledWindow4.SetScrollRate( 5, 5 )
-		bSizer2 = wx.BoxSizer( wx.VERTICAL )
-		
-		self.m_grid2 = wx.grid.Grid( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-		
-		# Grid
-		self.m_grid2.CreateGrid( 8, 4 )
-		self.m_grid2.EnableEditing( True )
-		self.m_grid2.EnableGridLines( True )
-		self.m_grid2.EnableDragGridSize( False )
-		self.m_grid2.SetMargins( 0, 0 )
-		
-		# Columns
-		self.m_grid2.EnableDragColMove( False )
-		self.m_grid2.EnableDragColSize( True )
-		self.m_grid2.SetColLabelSize( 30 )
-		self.m_grid2.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Rows
-		self.m_grid2.EnableDragRowSize( True )
-		self.m_grid2.SetRowLabelSize( 80 )
-		self.m_grid2.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Label Appearance
-		
-		# Cell Defaults
-		self.m_grid2.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
-		bSizer2.Add( self.m_grid2, 0, wx.ALL, 5 )
-		
-		
-		self.m_scrolledWindow4.SetSizer( bSizer2 )
-		self.m_scrolledWindow4.Layout()
-		bSizer2.Fit( self.m_scrolledWindow4 )
-		self.m_auinotebook41.AddPage( self.m_scrolledWindow4, u"Instrument commands", False, wx.NullBitmap )
-		self.m_scrolledWindow41 = wx.ScrolledWindow( self.m_auinotebook41, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
-		self.m_scrolledWindow41.SetScrollRate( 5, 5 )
-		bSizer21 = wx.BoxSizer( wx.VERTICAL )
-		
-		self.m_grid21 = wx.grid.Grid( self.m_scrolledWindow41, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-		
-		# Grid
-		self.m_grid21.CreateGrid( 8, 13 )
-		self.m_grid21.EnableEditing( True )
-		self.m_grid21.EnableGridLines( True )
-		self.m_grid21.EnableDragGridSize( False )
-		self.m_grid21.SetMargins( 0, 0 )
-		
-		# Columns
-		self.m_grid21.EnableDragColMove( False )
-		self.m_grid21.EnableDragColSize( True )
-		self.m_grid21.SetColLabelSize( 30 )
-		self.m_grid21.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Rows
-		self.m_grid21.EnableDragRowSize( True )
-		self.m_grid21.SetRowLabelSize( 80 )
-		self.m_grid21.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Label Appearance
-		
-		# Cell Defaults
-		self.m_grid21.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
-		bSizer21.Add( self.m_grid21, 0, wx.ALL, 5 )
-		
-		self.m_button151 = wx.Button( self.m_scrolledWindow41, wx.ID_ANY, u"Add Row", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer21.Add( self.m_button151, 0, wx.ALL, 5 )
-		
-		
-		self.m_scrolledWindow41.SetSizer( bSizer21 )
-		self.m_scrolledWindow41.Layout()
-		bSizer21.Fit( self.m_scrolledWindow41 )
-		self.m_auinotebook41.AddPage( self.m_scrolledWindow41, u"Callibration ranges", True, wx.NullBitmap )
 		
 		
 		self.m_mgr.Update()
@@ -387,14 +446,15 @@ class MyFrame1 ( wx.Frame ):
 		
 		# Connect Events
 		self.Bind( wx.EVT_CLOSE, self.OnClose )
-		self.m_button13.Bind( wx.EVT_BUTTON, self.OnGenerateTable )
-		self.m_button122.Bind( wx.EVT_BUTTON, self.OnAnalyse )
-		self.m_button5.Bind( wx.EVT_BUTTON, self.OnStart )
-		self.m_button6.Bind( wx.EVT_BUTTON, self.OnStop )
-		self.m_button12.Bind( wx.EVT_BUTTON, self.OnMakeSafe )
 		self.m_button14.Bind( wx.EVT_BUTTON, self.OnRefreshInstruments )
 		self.m_button15.Bind( wx.EVT_BUTTON, self.OnSendTestCommand )
 		self.m_button16.Bind( wx.EVT_BUTTON, self.OnReadTestCommand )
+		self.m_button13.Bind( wx.EVT_BUTTON, self.OnGenerateTable )
+		self.m_button11.Bind( wx.EVT_BUTTON, self.OnOpenDict )
+		self.m_button5.Bind( wx.EVT_BUTTON, self.OnStart )
+		self.m_button12.Bind( wx.EVT_BUTTON, self.OnMakeSafe )
+		self.m_button6.Bind( wx.EVT_BUTTON, self.OnStop )
+		self.m_button122.Bind( wx.EVT_BUTTON, self.OnAnalyse )
 		self.m_button2.Bind( wx.EVT_BUTTON, self.OnPauseButton )
 		self.Bind( wx.EVT_MENU, self.OnOpenDict, id = self.m_menuItem21.GetId() )
 		self.Bind( wx.EVT_MENU, self.OnSaveTables, id = self.m_menuItem11.GetId() )
@@ -417,21 +477,6 @@ class MyFrame1 ( wx.Frame ):
 	def OnClose( self, event ):
 		event.Skip()
 	
-	def OnGenerateTable( self, event ):
-		event.Skip()
-	
-	def OnAnalyse( self, event ):
-		event.Skip()
-	
-	def OnStart( self, event ):
-		event.Skip()
-	
-	def OnStop( self, event ):
-		event.Skip()
-	
-	def OnMakeSafe( self, event ):
-		event.Skip()
-	
 	def OnRefreshInstruments( self, event ):
 		event.Skip()
 	
@@ -441,11 +486,27 @@ class MyFrame1 ( wx.Frame ):
 	def OnReadTestCommand( self, event ):
 		event.Skip()
 	
-	def OnPauseButton( self, event ):
+	def OnGenerateTable( self, event ):
 		event.Skip()
 	
 	def OnOpenDict( self, event ):
 		event.Skip()
+	
+	def OnStart( self, event ):
+		event.Skip()
+	
+	def OnMakeSafe( self, event ):
+		event.Skip()
+	
+	def OnStop( self, event ):
+		event.Skip()
+	
+	def OnAnalyse( self, event ):
+		event.Skip()
+	
+	def OnPauseButton( self, event ):
+		event.Skip()
+	
 	
 	def OnSaveTables( self, event ):
 		event.Skip()
