@@ -15,16 +15,16 @@ import sys
 import visa
 import time
 
-import noname
-import visa2 # this is the simulation version of visa
-import GridMaker
-import graph_data
-import pywxgrideditmixin
-import tables
-import analysis
-import gpib_data
-import gpib_inst
-import stuff
+import modules.noname as noname
+import modules.visa2 as visa2 # this is the simulation version of visa
+import modules.GridMaker as GridMaker
+import modules.graph_data as graph_data
+import modules.pywxgrideditmixin as pywxgrideditmixin
+import modules.tables as tables
+import modules.analysis as analysis
+import modules.gpib_data as gpib_data
+import modules.gpib_inst as gpib_inst
+import modules.stuff as stuff
 class GraphFrame( noname.MyFrame1 ):
     def __init__( self, parent ):
         noname.MyFrame1.__init__( self, parent)
@@ -139,6 +139,8 @@ class GraphFrame( noname.MyFrame1 ):
         """
         if self.m_menuItem1.IsChecked():
             self.inst_bus = visa2 #choose visa2 for simulation
+        else:
+            self.inst_bus = visa
 
     def OnOpenDict(self, event):
         """
@@ -342,7 +344,13 @@ class GraphFrame( noname.MyFrame1 ):
         """
         controlgrid = tables.TABLES(self)
         controlgrid.grid_to_excel(path, [(self.m_grid3,"Control"),(self.m_grid2,"Dict"),(self.m_grid21,"Ranges")])
-
+        
+    def on_grid_edited(self, event):
+        """When one of the two input grids is edited, disable the run button."""
+        self.filled_grid = False
+        #This prevents the user from running the program until they press
+        #the fill grid button, and update the grid.
+        
     def DoReset(self, event):
         """
         Resets by clearing the data, and clearing the on screen text feedback.
@@ -361,26 +369,31 @@ class GraphFrame( noname.MyFrame1 ):
         if self.filled_grid == True:
             instruments = self.CreateInstruments()
             self.doStart(instruments)
+        else:
+            print("Input grids changed, generate a table again to continue")
         
     def CreateInstruments(self):
         """
         Reads the dictionary uploaded to the grid, and creates gpib_inst.INSTRUMENT accordingly.
         Instruments must be the meter on the left, source S in the middle, source X on the right.
         """
+        def sim(s):
+            """Nested function used only here, returns a simplified string"""
+            s = s.replace('\\r','\r')
+            s = s.replace('\\n','\n')
+            #Other simplifications might be necessary in the future I suppose.
+            return s
+        
         dicts = self.m_grid2
-        dm={}
-        dx={}
-        ds={}
+        dm={} #Meter dictionary
+        dx={} #X dictionary
+        ds={} #S dictionary
         rows = dicts.GetNumberRows()
         for row in range(rows):
-            dm.update({str(dicts.GetCellValue(row, 0)):str(dicts.GetCellValue(row, 1))})
-            ds.update({str(dicts.GetCellValue(row, 2)):str(dicts.GetCellValue(row, 3))})
-            dx.update({str(dicts.GetCellValue(row, 4)):str(dicts.GetCellValue(row, 5))})
-
-        #so that the read_raw function matches the no error string
-        #dm.update({'NoError':repr(dm['NoError'])})
-        #ds.update({'NoError':repr(ds['NoError'])})
-        #dx.update({'NoError':repr(dx['NoError'])})
+            dm.update({sim(dicts.GetCellValue(row, 0)):sim(dicts.GetCellValue(row, 1))})
+            ds.update({sim(dicts.GetCellValue(row, 2)):sim(dicts.GetCellValue(row, 3))})
+            dx.update({sim(dicts.GetCellValue(row, 4)):sim(dicts.GetCellValue(row, 5))})
+        #Unpack the dictionaries to each respective instrument.
         self.meter = gpib_inst.INSTRUMENT(self.inst_bus, 'M', adress=self.MeterAdress.GetValue(), **dm)
         self.sourceS = gpib_inst.INSTRUMENT(self.inst_bus, 'S', adress=self.SAdress.GetValue(), **ds)
         self.sourceX = gpib_inst.INSTRUMENT(self.inst_bus, 'X', adress=self.XAdress.GetValue(), **dx)        
@@ -447,6 +460,8 @@ class GraphFrame( noname.MyFrame1 ):
         """
         Flags all threads to stop.
         """
+        if self.worker1:
+            self.worker1.MakeSafe()
         self.doStop() #stop main data gathering
         self.timer0.Stop()#graph timer is stopped
         self.paused = True #graphing is paused
@@ -585,7 +600,7 @@ class GraphFrame( noname.MyFrame1 ):
         if name == 'Meter':
             adress = self.MeterAdress.GetValue()
             self.doOnSend(adress)
-        elif name == 'Stable source (S)' :
+        elif name == 'Reference source (S)' :
             adress = self.SAdress.GetValue()
             self.doOnSend(adress)
         elif name == 'To calibrate (X)':
@@ -616,7 +631,7 @@ class GraphFrame( noname.MyFrame1 ):
         if instrument == 'Meter':
             adress = self.MeterAdress.GetValue()
             self.doRead(adress)
-        elif instrument == 'Stable source (S)' :
+        elif instrument == 'Reference source (S)' :
             adress = self.SAdress.GetValue()
             self.doRead(adress)
         elif instrument == 'To calibrate (X)':
